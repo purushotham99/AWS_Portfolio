@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  SecurityGroupDescription:
+    Description: Security Group Description
+    Type: String
+    Default: "Security Group for EC2 instance"
+
+Resources:
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: us-east-1a
+      ImageId: ami-0ba9883b710b05ac6
+      InstanceType: t2.medium
+      SecurityGroups:
+        - !Ref PublicSecurityGroup
+      Tags:
+        - Key: Name
+          Value: Cloud-Frontend
+      UserData: 
+        Fn::Base64: |
+          #!/bin/bash
+          # Update the system
+          sudo yum update -y
+
+          # Install Node.js and npm
+          curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+          sudo yum install -y nodejs
+
+          # Install Git
+          sudo yum install -y git
+
+          # Clone the GitHub repository
+          git clone https://github.com/purushotham99/portfolio.git
+          cd portfolio
+
+          # Install project dependencies
+          npm install
+
+          # Build the React application
+          npm run build
+
+          # Serve the React application
+          npx serve -s build -l 3000
+
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref MyInstance
+
+  PublicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Ref SecurityGroupDescription
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  InstanceId:
+    Description: ID of the EC2 instance
+    Value: !Ref MyInstance
+  InstancePublicIP:
+    Description: Public IP address of the EC2 instance
+    Value: !Ref MyEIP
+  SecurityGroupId:
+    Description: Security Group ID
+    Value: !Ref PublicSecurityGroup

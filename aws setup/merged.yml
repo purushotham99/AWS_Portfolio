@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  SecurityGroupDescription:
+    Description: Security Group Description
+    Type: String
+    Default: "Security Group for EC2 instance"
+
+Resources:
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: us-east-1a
+      ImageId: ami-0ba9883b710b05ac6
+      InstanceType: t2.medium
+      SecurityGroups:
+        - !Ref PublicSecurityGroup
+      Tags:
+        - Key: Name
+          Value: Cloud-Frontend
+
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref MyInstance
+
+  PublicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Ref SecurityGroupDescription
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+
+  LambdaFunctionCSCI5409:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: 'index.handler'
+      Role: 'arn:aws:iam::575959420954:role/LabRole'
+      Code:
+        S3Bucket: 'resume-puru'
+        S3Key: 'llm_js/llm_js.zip'
+      Runtime: 'nodejs20.x'
+      Timeout: 60  # Timeout in seconds
+
+  ApiGatewayCSCI5409:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name: 'LLMApiGatewayCSCI5409'
+      Description: 'API Gateway for LLM endpoint CSCI5409.'
+
+  ResourceLLMCSCI5409:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt 'ApiGatewayCSCI5409.RootResourceId'
+      PathPart: 'llm'  # the part of the URL (after '/') 
+      RestApiId: !Ref 'ApiGatewayCSCI5409'
+
+  MethodPostLLMCSCI5409:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: 'POST'
+      ResourceId: !Ref 'ResourceLLMCSCI5409'
+      RestApiId: !Ref 'ApiGatewayCSCI5409'
+      AuthorizationType: 'NONE'
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionCSCI5409.Arn}/invocations'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  MethodOptionsLLMCSCI5409:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: 'OPTIONS'
+      ResourceId: !Ref 'ResourceLLMCSCI5409'
+      RestApiId: !Ref 'ApiGatewayCSCI5409'
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'MOCK'
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: '{}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  DeploymentCSCI5409:
+    Type: 'AWS::ApiGateway::Deployment'
+    DependsOn: ['MethodPostLLMCSCI5409', 'MethodOptionsLLMCSCI5409']
+    Properties:
+      RestApiId: !Ref 'ApiGatewayCSCI5409'
+      StageName: 'Prod'
+
+  LambdaPermissionCSCI5409:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt 'LambdaFunctionCSCI5409.Arn'
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayCSCI5409}/*/*/*'
+
+  GuardDutyDetector:
+    Type: 'AWS::GuardDuty::Detector'
+    Properties:
+      Enable: true
+      FindingPublishingFrequency: FIFTEEN_MINUTES
+
+Outputs:
+  InstanceId:
+    Description: ID of the EC2 instance
+    Value: !Ref MyInstance
+  InstancePublicIP:
+    Description: Public IP address of the EC2 instance
+    Value: !Ref MyEIP
+  SecurityGroupId:
+    Description: Security Group ID
+    Value: !Ref PublicSecurityGroup
+  LambdaFunctionArnCSCI5409:
+    Description: 'ARN of Lambda Function CSCI5409'
+    Value: !GetAtt 'LambdaFunctionCSCI5409.Arn'
+  ApiEndpointCSCI5409:
+    Description: 'Endpoint for API Gateway CSCI5409'
+    Value: !Sub 'https://${ApiGatewayCSCI5409}.execute-api.${AWS::Region}.amazonaws.com/Prod/llm'
