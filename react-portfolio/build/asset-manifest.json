@@ -1,0 +1,19 @@
+{
+  "files": {
+    "main.css": "/static/css/main.6a238fe4.css",
+    "main.js": "/static/js/main.7588ecee.js",
+    "static/js/3.0b699837.chunk.js": "/static/js/3.0b699837.chunk.js",
+    "static/media/react-portfolio.png": "/static/media/react-portfolio.0869ad906d2a11647ea7.png",
+    "static/media/veritru.png": "/static/media/veritru.0869ad906d2a11647ea7.png",
+    "static/media/Purushotham Parthy - Resume_Latest.pdf": "/static/media/Purushotham Parthy - Resume_Latest.3915c32ab746764b3aae.pdf",
+    "static/media/profile.png": "/static/media/profile.b72c36d57d5099db83a0.png",
+    "index.html": "/index.html",
+    "main.6a238fe4.css.map": "/static/css/main.6a238fe4.css.map",
+    "main.7588ecee.js.map": "/static/js/main.7588ecee.js.map",
+    "3.0b699837.chunk.js.map": "/static/js/3.0b699837.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6a238fe4.css",
+    "static/js/main.7588ecee.js"
+  ]
+}

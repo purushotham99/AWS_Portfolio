@@ -1,0 +1,50 @@
+{
+    "basics": {
+        "name": "Purushotham Parthy",
+        "label": "Data Scientist",
+        "email": "purushothamparthy@gmail.com",
+        "phone": "782-882-4002",
+        "picture": "mt.png",
+        "x_title": "Hello, I'm",
+        "job1": "Data",
+        "job2": "Scientist",
+        "description": "As a Data Scientist, I have had the opportunity to work on an array of complex and diverse technologies in my field. Owing to this, I have proudly developed my skills to research into any new topic, understand it, and build solutions that bring actual impact to the given problem and would continue to do so.",
+        "summary": "based in Halifax, Canada.",
+        "keywords": "data science, machine learning, natural language processing, deep learning, AWS, healthcare, MedTech, cybersecurity, IoT",
+        "url": "",
+        "location": {
+            "address": "Green Street, Halifax",
+            "postalCode": "B3H 1N7",
+            "city": "Halifax",
+            "country": "Canada",
+            "countryCode": "CA",
+            "region": "Nova Scotia"
+        },
+        "profiles": [
+            {
+                "network": "Google",
+                "username": "purushothamparthy@gmail.com",
+                "url": "mailto:purushothamparthy@gmail.com",
+                "x_icon": "fab fa-google"
+            },
+            {
+                "network": "LinkedIn",
+                "username": "Purushotham Parthy",
+                "url": "https://www.linkedin.com/in/purushotham-parthy-1a6618138/",
+                "x_icon": "fab fa-linkedin-in"
+            },
+            {
+                "network": "GitHub",
+                "username": "Purushotham Parthy",
+                "url": "https://github.com/purushotham99",
+                "x_icon": "fab fa-github"
+            },
+            {
+                "network": "Telegram",
+                "username": "@Purushotham99",
+                "url": "https://t.me/@Purushotham99",
+                "x_icon": "fab fa-telegram-plane"
+            }
+        ]
+    }
+}
